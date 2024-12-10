@@ -6,7 +6,6 @@ use axum::http::Method;
 use axum::Router;
 use axum::routing::get;
 use tokio::net::TcpListener;
-use tokio::signal::ctrl_c;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::timeout::TimeoutLayer;
