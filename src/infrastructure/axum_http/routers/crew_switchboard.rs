@@ -17,8 +17,8 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let crew_switchboard_use_case = CrewSwitchboardUseCase::new(Arc::new(crew_switchboard_repository), Arc::new(quest_viewing_repository));
 
     Router::new()
-        .route("/join", post(join))
-        .route("/leave", delete(leave))
+        .route("/join/:quest_id", post(join))
+        .route("/leave/:quest_id", delete(leave))
         .with_state(Arc::new(crew_switchboard_use_case))
 }
 

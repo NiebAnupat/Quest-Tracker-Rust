@@ -2,7 +2,9 @@
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Json, Router};
+use axum::http::StatusCode;
 use axum::routing::post;
+use serde_json::Serializer;
 use crate::application::usecases::adventurers::AdventurersUseCase;
 use crate::domain::repositories::adventurers::AdventurersRepository;
 use crate::domain::value_objects::adventurer_model::RegisterAdventurerModel;
@@ -27,4 +29,5 @@ where
     T: AdventurersRepository + Send + Sync,
 {
     unimplemented!()
+    // Ok::<_, (StatusCode, Json<RegisterAdventurerModel>)>((StatusCode::CREATED, Json(register_adventurer_model)))
 }

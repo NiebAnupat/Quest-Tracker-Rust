@@ -14,11 +14,19 @@ use tracing::info;
 use crate::config::config_model::DotEnvyConfig;
 use crate::infrastructure::axum_http::default_routers::{health_check, not_found};
 use crate::infrastructure::postgres::postgres_connection::PgPoolSquad;
+use super::routers;
 
 pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Result<()> {
     let app = Router::new()
         .fallback(not_found)
         .route("/health-check", get(health_check))
+        .nest("/authentication", routers::authentication::routes(Arc::clone(&db_pool)))
+        .nest("/adventurer", routers::adventurers::routes(Arc::clone(&db_pool)))
+        .nest("/guild-commander", routers::guild_commander::routes(Arc::clone(&db_pool)))
+        .nest("/crew-switchboard", routers::crew_switchboard::routes(Arc::clone(&db_pool)))
+        .nest("/quest-ops", routers::quest_ops::routes(Arc::clone(&db_pool)))
+        .nest("/quest-viewing", routers::quest_viewing::routes(Arc::clone(&db_pool)))
+        .nest("/journey-ledger", routers::journey_ledger::routes(Arc::clone(&db_pool)))
         .layer(TimeoutLayer::new(Duration::from_secs(config.server.timeout)))
         .layer(RequestBodyLimitLayer::new((config.server.body_limit * 1024 * 1024).try_into()?))
         .layer(CorsLayer::new().allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]).allow_origin(Any))

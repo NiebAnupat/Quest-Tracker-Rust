@@ -15,6 +15,7 @@ pub struct QuestModel {
     pub updated_at: NaiveDateTime,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AddQuestModel {
     pub name: String,
     pub description: Option<String>,
