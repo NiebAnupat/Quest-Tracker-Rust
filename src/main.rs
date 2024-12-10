@@ -1,5 +1,7 @@
+use std::sync::Arc;
 use tracing::{error, info};
 use quests_tracker::config::config_loader;
+use quests_tracker::infrastructure::axum_http::http_serve::start;
 use quests_tracker::infrastructure::postgres::postgres_connection;
 
 #[tokio::main]
@@ -14,7 +16,7 @@ async fn main() {
         }
     };
 
-    info!("Loaded env: {:?}", dotenvy_env);
+    info!("Loaded env");
 
     let postgres_pool = match postgres_connection::establish_connection(&dotenvy_env.database.url) {
         Ok(pool) => pool,
@@ -24,5 +26,7 @@ async fn main() {
         }
     };
 
-    info!("Established connection: {:?}", postgres_pool);
+    info!("Established database connection");
+
+    start(Arc::new(dotenvy_env), Arc::new(postgres_pool)).await.expect("Failed to start server");
 }
