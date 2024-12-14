@@ -1,15 +1,17 @@
-﻿use std::sync::Arc;
-use axum::extract::State;
-use axum::response::IntoResponse;
-use axum::{Json, Router};
-use axum::http::StatusCode;
-use axum::routing::post;
-use serde_json::Serializer;
-use crate::application::usecases::adventurers::AdventurersUseCase;
+﻿use crate::application::usecases::adventurers::AdventurersUseCase;
 use crate::domain::repositories::adventurers::AdventurersRepository;
 use crate::domain::value_objects::adventurer_model::RegisterAdventurerModel;
 use crate::infrastructure::postgres::postgres_connection::PgPoolSquad;
 use crate::infrastructure::postgres::repositories::adventurers::AdventurersPostgres;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::routing::post;
+use axum::{Json, Router};
+use std::sync::Arc;
+use tracing::info;
+
+const SERVICE_CONTEXT: &str = "ADVENTURERS_ROUTER";
 
 pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     // repository -> use case -> router
@@ -28,6 +30,17 @@ pub async fn register<T>(
 where
     T: AdventurersRepository + Send + Sync,
 {
-    unimplemented!()
-    // Ok::<_, (StatusCode, Json<RegisterAdventurerModel>)>((StatusCode::CREATED, Json(register_adventurer_model)))
+    const ACTION_NAME: &str = "REGISTER";
+    info!("START - {}: {} - server_time: {}", SERVICE_CONTEXT, ACTION_NAME, chrono::Utc::now());
+
+    match adventurers_use_case.register(register_adventurer_model).await {
+        Ok(id) => {
+            info!("SUCCESS - {}: {} - id={} - server_time: {}", SERVICE_CONTEXT, ACTION_NAME, id, chrono::Utc::now());
+            (StatusCode::CREATED, format!("เพิ่มข้อมูลนักผจญภัยสำเร็จ หมายเลขนักผจญภัย: {}", id)).into_response()
+        }
+        Err(e) => {
+            info!("ERROR - {}: {} - error={} - server_time: {}", SERVICE_CONTEXT, ACTION_NAME, e, chrono::Utc::now());
+            (StatusCode::INTERNAL_SERVER_ERROR, format!("เพิ่มข้อมูลนักผจญภัยไม่สำเร็จ กรุณาลองใหม่อีกครั้ง : {}", e.to_string())).into_response()
+        }
+    }
 }
